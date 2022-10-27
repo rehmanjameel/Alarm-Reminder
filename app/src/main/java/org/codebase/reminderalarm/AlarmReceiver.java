@@ -1,6 +1,7 @@
 package org.codebase.reminderalarm;
 
 import static android.content.Context.ALARM_SERVICE;
+import static android.content.Intent.getIntent;
 import static android.provider.MediaStore.MediaColumns.TITLE;
 
 import static org.codebase.reminderalarm.MainActivity.currentTime;
@@ -21,11 +22,13 @@ import android.net.Uri;
 import android.os.Build;
 import android.os.SystemClock;
 import android.os.Vibrator;
+import android.util.Log;
 import android.widget.Toast;
 
 import androidx.annotation.RequiresApi;
 import androidx.core.app.NotificationCompat;
 
+import java.net.URISyntaxException;
 import java.util.concurrent.TimeUnit;
 
 public class AlarmReceiver extends BroadcastReceiver {
@@ -33,7 +36,13 @@ public class AlarmReceiver extends BroadcastReceiver {
 
     @Override
     public void onReceive(Context context, Intent intent) {
-
+        Intent intent1 = null;
+        try {
+            intent1 = getIntent("title");
+            Log.e("emkwlf ", intent1.toString());
+        } catch (URISyntaxException e) {
+            e.printStackTrace();
+        }
 //        if (Intent.ACTION_BOOT_COMPLETED.equals(intent.getAction())) {
 //            String toastText = String.format("Alarm Reboot");
 //            Toast.makeText(context, toastText, Toast.LENGTH_SHORT).show();
@@ -56,7 +65,7 @@ public class AlarmReceiver extends BroadcastReceiver {
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
                 context.startForegroundService(intent);
             }
-            showNotification(context, "Alarm", "It's Alarm time!");
+            showNotification(context, intent1.toString(), "It's Alarm time!");
         }
     }
 

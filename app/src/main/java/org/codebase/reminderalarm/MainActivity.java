@@ -99,7 +99,7 @@ public class MainActivity extends AppCompatActivity {
                             String text = jsonObject1.getString("text");
                             String date = jsonObject1.getString("date");
                             Log.e("events date ", date);
-                            setAlarm(date);
+                            setAlarm(title, text, date);
                             eventsModel = new EventsModel(title, text, date);
                             eventsModelArrayList.add(eventsModel);
                             eventsAdapter = new EventsAdapter(eventsModelArrayList, this);
@@ -126,7 +126,7 @@ public class MainActivity extends AppCompatActivity {
         httpRequest.get("https://visihelp.com/feed/?id=re462eea7cfec4e84d4267435");
     }
 
-    public void setAlarm(String eventDate) {
+    public void setAlarm(String title, String text, String eventDate) {
         String times = "2022-10-27 03:31:05";
         Date date = null;
         SimpleDateFormat formatter5 = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss'Z'");
@@ -147,6 +147,8 @@ public class MainActivity extends AppCompatActivity {
 
         //Schedule Alarm Receiver in Main Activity
         Intent intent1 = new Intent(this, AlarmReceiver.class);
+        intent1.putExtra("title", title);
+        intent1.putExtra("text", text);
         PendingIntent pendingIntent1 = PendingIntent.getBroadcast(
                 this.getApplicationContext(), 234, intent1, PendingIntent.FLAG_IMMUTABLE);
         AlarmManager alarmManager1 = (AlarmManager) getSystemService(ALARM_SERVICE);
@@ -154,7 +156,7 @@ public class MainActivity extends AppCompatActivity {
             Log.e("here is? ", "yes");
             alarmManager1.setExactAndAllowWhileIdle(AlarmManager.ELAPSED_REALTIME_WAKEUP,
                     SystemClock.elapsedRealtime()+
-                            TimeUnit.SECONDS.toMillis(secs), pendingIntent1);
+                            TimeUnit.SECONDS.toMillis(10), pendingIntent1);
         } else
         {
             Log.e("No! ", "here");
