@@ -38,6 +38,9 @@
             android:enabled="true"
             android:exported="false">
 
+            <intent-filter>
+                <action android:name="PLAY_ACTION"/>
+            </intent-filter>
         </receiver>
 
     </application>

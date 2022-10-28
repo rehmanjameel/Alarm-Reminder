@@ -1,13 +1,5 @@
 package org.codebase.reminderalarm;
 
-import static android.content.Context.ALARM_SERVICE;
-import static android.content.Intent.getIntent;
-import static android.provider.MediaStore.MediaColumns.TITLE;
-
-import static org.codebase.reminderalarm.MainActivity.currentTime;
-import static org.codebase.reminderalarm.MainActivity.longTime;
-
-import android.app.AlarmManager;
 import android.app.NotificationChannel;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
@@ -20,52 +12,31 @@ import android.media.Ringtone;
 import android.media.RingtoneManager;
 import android.net.Uri;
 import android.os.Build;
-import android.os.SystemClock;
 import android.os.Vibrator;
-import android.util.Log;
 import android.widget.Toast;
 
 import androidx.annotation.RequiresApi;
 import androidx.core.app.NotificationCompat;
 
-import java.net.URISyntaxException;
-import java.util.concurrent.TimeUnit;
-
 public class AlarmReceiver extends BroadcastReceiver {
-    public static final String RECURRING = "RECURRING";
 
     @Override
     public void onReceive(Context context, Intent intent) {
-        Intent intent1 = null;
-        try {
-            intent1 = getIntent("title");
-            Log.e("emkwlf ", intent1.toString());
-        } catch (URISyntaxException e) {
-            e.printStackTrace();
-        }
-//        if (Intent.ACTION_BOOT_COMPLETED.equals(intent.getAction())) {
-//            String toastText = String.format("Alarm Reboot");
-//            Toast.makeText(context, toastText, Toast.LENGTH_SHORT).show();
-//
-//        }
-//        else {
-//            String toastText = String.format("Alarm Received");
-//            Toast.makeText(context, toastText, Toast.LENGTH_SHORT).show();
-//            startAlarmService(context, intent);
-//
-//            if (!intent.getBooleanExtra(RECURRING, false)) {
-//                startAlarmService(context, intent);
-//            }
-//        }
 
-//        startAlarmReceiver(context);
-        vibrator(context);
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-//            startAlarmService(context, intent);
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-                context.startForegroundService(intent);
+        String action = intent.getAction();
+        if (action.equals("PLAY_ACTION")) {
+
+            String title = intent.getExtras().getString("title");
+            String text = intent.getExtras().getString("text");
+            String date = intent.getExtras().getString("date");
+            vibrator(context);
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                    context.startForegroundService(intent);
+                }
+                showNotification(context, title, text + "\n" + date);
             }
-            showNotification(context, intent1.toString(), "It's Alarm time!");
         }
     }
 
@@ -103,23 +74,6 @@ public class AlarmReceiver extends BroadcastReceiver {
         notificationManager.notify(12, builder.build());
     }
 
-//    public void startAlarmReceiver(Context context) {
-//        Intent intent = new Intent(context, AlarmReceiver.class);
-//        PendingIntent pendingIntent = PendingIntent.getBroadcast(
-//                context.getApplicationContext(), 234, intent, 0);
-//        AlarmManager alarmManager = (AlarmManager) context.getSystemService(ALARM_SERVICE);
-//        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-//            alarmManager.setExactAndAllowWhileIdle(AlarmManager.ELAPSED_REALTIME_WAKEUP,
-//                    SystemClock.elapsedRealtime()+
-//                            TimeUnit.SECONDS.toMillis(20),
-//                    pendingIntent);
-//        } else {
-//            alarmManager.setExact(AlarmManager.ELAPSED_REALTIME_WAKEUP,
-//                    SystemClock.elapsedRealtime() +
-//                            TimeUnit.SECONDS.toMillis(20), pendingIntent);
-//        }
-//    }
-
     public void vibrator(Context context) {
         Vibrator vibrator = (Vibrator) context.getSystemService(Context.VIBRATOR_SERVICE);
         vibrator.vibrate(4000);
@@ -136,15 +90,5 @@ public class AlarmReceiver extends BroadcastReceiver {
         // play ringtone
         ringtone.play();
     }
-
-//    private void startAlarmService(Context context, Intent intent) {
-//        Intent intentService = new Intent(context, AlarmService.class);
-//        intentService.putExtra(TITLE, intent.getStringExtra(TITLE));
-//        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-//            context.startForegroundService(intentService);
-//        } else {
-//            context.startService(intentService);
-//        }
-//    }
 
 }
