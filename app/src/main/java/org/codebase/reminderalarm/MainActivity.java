@@ -38,6 +38,7 @@ public class MainActivity extends AppCompatActivity {
     public static long longTime;
     public static long currentTime;
     private ArrayList<PendingIntent> intentArrayList = new ArrayList<>();
+    private ArrayList<String> dates = new ArrayList<>();
 
     @RequiresApi(api = Build.VERSION_CODES.M)
     @Override
@@ -45,6 +46,11 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
+        dates.add("2022-11-02T18:40:05Z");
+        dates.add("2022-11-02T18:55:05Z");
+        dates.add("2022-11-02T19:10:05Z");
+        dates.add("2022-11-02T19:25:05Z");
+        dates.add("2022-11-02T19:40:05Z");
         eventsModelArrayList = new ArrayList<>();
         recyclerView = findViewById(R.id.recyclerViewId);
 
@@ -59,7 +65,14 @@ public class MainActivity extends AppCompatActivity {
             }
         }
 
-        getJSONFile();
+        Log.e("check array ", String.valueOf(dates.size()) + dates.toString());
+        for (int i = 0; i < dates.size(); i++) {
+            Log.e("check array ", dates.get(i));
+
+            setAlarm("Alarm title", "Alarm text is here! ", dates.get(i), i);
+        }
+
+//        getJSONFile();
     }
 
     public void getJSONFile() {
