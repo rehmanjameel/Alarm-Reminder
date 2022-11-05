@@ -46,11 +46,11 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        dates.add("2022-11-02T18:40:05Z");
-        dates.add("2022-11-02T18:55:05Z");
-        dates.add("2022-11-02T19:10:05Z");
-        dates.add("2022-11-02T19:25:05Z");
-        dates.add("2022-11-02T19:40:05Z");
+        dates.add("2022-11-04T15:35:05Z");
+        dates.add("2022-11-04T15:45:05Z");
+        dates.add("2022-11-04T16:5:05Z");
+        dates.add("2022-11-05T18:30:05Z");
+        dates.add("2022-11-05T19:45:05Z");
         eventsModelArrayList = new ArrayList<>();
         recyclerView = findViewById(R.id.recyclerViewId);
 
@@ -69,7 +69,16 @@ public class MainActivity extends AppCompatActivity {
         for (int i = 0; i < dates.size(); i++) {
             Log.e("check array ", dates.get(i));
 
-            setAlarm("Alarm title", "Alarm text is here! ", dates.get(i), i);
+            setAlarm("Alarm title" + i, "Alarm text is here! ", dates.get(i), i);
+            eventsModel = new EventsModel("Alarm title" + i, "Alarm text is here! ", dates.get(i));
+            eventsModelArrayList.add(eventsModel);
+            eventsAdapter = new EventsAdapter(eventsModelArrayList, this);
+
+            recyclerView.setAdapter(eventsAdapter);
+            LinearLayoutManager layoutManager
+                    = new LinearLayoutManager(this, LinearLayoutManager.VERTICAL,
+                    false);
+            recyclerView.setLayoutManager(layoutManager);
         }
 
 //        getJSONFile();
