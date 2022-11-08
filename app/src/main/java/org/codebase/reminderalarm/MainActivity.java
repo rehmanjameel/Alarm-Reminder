@@ -38,7 +38,7 @@ public class MainActivity extends AppCompatActivity {
     public static long longTime;
     public static long currentTime;
     private ArrayList<PendingIntent> intentArrayList = new ArrayList<>();
-    private ArrayList<String> dates = new ArrayList<>();
+//    private ArrayList<String> dates = new ArrayList<>();
 
     @RequiresApi(api = Build.VERSION_CODES.M)
     @Override
@@ -46,11 +46,11 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        dates.add("2022-11-04T15:35:05Z");
-        dates.add("2022-11-04T15:45:05Z");
-        dates.add("2022-11-04T16:5:05Z");
-        dates.add("2022-11-05T18:30:05Z");
-        dates.add("2022-11-05T19:45:05Z");
+//        dates.add("2022-11-04T15:35:05Z");
+//        dates.add("2022-11-04T15:45:05Z");
+//        dates.add("2022-11-04T16:5:05Z");
+//        dates.add("2022-11-05T18:30:05Z");
+//        dates.add("2022-11-05T19:45:05Z");
         eventsModelArrayList = new ArrayList<>();
         recyclerView = findViewById(R.id.recyclerViewId);
 
@@ -65,23 +65,22 @@ public class MainActivity extends AppCompatActivity {
             }
         }
 
-        Log.e("check array ", String.valueOf(dates.size()) + dates.toString());
-        for (int i = 0; i < dates.size(); i++) {
-            Log.e("check array ", dates.get(i));
+//        Log.e("check array ", String.valueOf(dates.size()) + dates.toString());
+//        for (int i = 0; i < dates.size(); i++) {
+//            Log.e("check array ", dates.get(i));
 
-            setAlarm("Alarm title" + i, "Alarm text is here! ", dates.get(i), i);
-            eventsModel = new EventsModel("Alarm title" + i, "Alarm text is here! ", dates.get(i));
-            eventsModelArrayList.add(eventsModel);
-            eventsAdapter = new EventsAdapter(eventsModelArrayList, this);
-
-            recyclerView.setAdapter(eventsAdapter);
-            LinearLayoutManager layoutManager
-                    = new LinearLayoutManager(this, LinearLayoutManager.VERTICAL,
-                    false);
-            recyclerView.setLayoutManager(layoutManager);
-        }
-
-//        getJSONFile();
+//            setAlarm("Alarm title" + i, "Alarm text is here! ", dates.get(i), i);
+//            eventsModel = new EventsModel("Alarm title" + i, "Alarm text is here! ", dates.get(i));
+//            eventsModelArrayList.add(eventsModel);
+//            eventsAdapter = new EventsAdapter(eventsModelArrayList, this);
+//
+//            recyclerView.setAdapter(eventsAdapter);
+//            LinearLayoutManager layoutManager
+//                    = new LinearLayoutManager(this, LinearLayoutManager.VERTICAL,
+//                    false);
+//            recyclerView.setLayoutManager(layoutManager);
+//        }
+        getJSONFile();
     }
 
     public void getJSONFile() {
@@ -91,19 +90,15 @@ public class MainActivity extends AppCompatActivity {
             if (response.code == HttpResponse.HTTP_OK) {
                 JSONObject jsonObject = response.toJSONObject();
                 try {
-                    String events = jsonObject.getString("events");
-                    Log.e("events", events);
+//                    String events = jsonObject.getString("events");
                     JSONArray jsonArray = jsonObject.getJSONArray("events");
-                    Log.e("events", String.valueOf(jsonArray.length()));
 
                     for (int i = 0; i < jsonArray.length(); i++) {
                         try {
                             JSONObject jsonObject1 = jsonArray.getJSONObject(i);
-                            Log.e("events array ", jsonObject1.toString());
                             String title = jsonObject1.getString("title");
                             String text = jsonObject1.getString("text");
                             String date = jsonObject1.getString("date");
-                            Log.e("events date ", date);
                             setAlarm(title, text, date, i);
                             eventsModel = new EventsModel(title, text, date);
                             eventsModelArrayList.add(eventsModel);
@@ -132,47 +127,35 @@ public class MainActivity extends AppCompatActivity {
     }
 
     public void setAlarm(String title, String text, String eventDate, int i) {
-//        String times = "2022-10-27 03:31:05";
         Date alarmDate = new Date();
         SimpleDateFormat formatter5 = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss'Z'");
         try {
             alarmDate = formatter5.parse(eventDate);
-            Log.e("check date", String.valueOf(alarmDate));
-
         } catch (ParseException e) {
             e.printStackTrace();
         }
         assert alarmDate != null;
         longTime = Long.parseLong(String.valueOf(alarmDate.getTime()));
-        Log.e("check date1", String.valueOf(longTime));
         currentTime = System.currentTimeMillis();
 
         Date currentDate = new Date(currentTime);
-        Log.e("check date2", String.valueOf(currentTime));
         long secs = TimeUnit.MILLISECONDS.toSeconds(longTime - currentTime);
-        Log.e("check date3", String.valueOf(secs));
         AlarmManager alarmManager1 = (AlarmManager) getSystemService(ALARM_SERVICE);
         if (alarmDate.after(currentDate)) {
-            Log.e("check datess", i + "  --- " + String.valueOf(alarmDate));
-
             //Schedule Alarm Receiver in Main Activity
             Intent intent1 = new Intent(this, AlarmReceiver.class);
             intent1.setAction("PLAY_ACTION");
             intent1.putExtra("title", title);
             intent1.putExtra("text", text);
-            intent1.putExtra("date", eventDate);
-//        sendBroadcast(intent1);
             PendingIntent pendingIntent1 = PendingIntent.getBroadcast(
                     this, i, intent1, PendingIntent.FLAG_IMMUTABLE);
 
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-                Log.e("here is? ", "yes");
                 alarmManager1.setExactAndAllowWhileIdle(AlarmManager.ELAPSED_REALTIME_WAKEUP,
                         SystemClock.elapsedRealtime() +
                                 TimeUnit.SECONDS.toMillis(secs), pendingIntent1);
                 intentArrayList.add(pendingIntent1);
             } else {
-                Log.e("No! ", "here");
                 alarmManager1.setExact(AlarmManager.ELAPSED_REALTIME_WAKEUP,
                         SystemClock.elapsedRealtime()
                                 + TimeUnit.SECONDS.toMillis(20), pendingIntent1);
@@ -182,7 +165,6 @@ public class MainActivity extends AppCompatActivity {
         if (alarmDate.before(currentDate)) {
             if (intentArrayList.size() > 0) {
                 for (int j = 0; j < intentArrayList.size(); j++) {
-                    Log.e("is here in if lese ", alarmDate.toString());
                     alarmManager1.cancel(intentArrayList.get(j));
                 }
                 intentArrayList.clear();
