@@ -78,12 +78,7 @@ public class MainActivity extends AppCompatActivity {
         }
 
         //cancel all tasks
-        if (intentArrayList.size() > 0) {
-            for (int j = 0; j < intentArrayList.size(); j++) {
-                alarmManager1.cancel(intentArrayList.get(j));
-            }
-            intentArrayList.clear();
-        }
+        cancelPreviousAlarms();
 
         ExecutorService executor = Executors.newSingleThreadExecutor();
         Handler handler = new Handler(Looper.getMainLooper());
@@ -121,6 +116,7 @@ public class MainActivity extends AppCompatActivity {
 
     }
     public void getJSONFile() {
+        cancelPreviousAlarms();
         HttpRequest httpRequest = new HttpRequest();
 
         httpRequest.setOnResponseListener(response -> {
@@ -179,7 +175,6 @@ public class MainActivity extends AppCompatActivity {
     }
 
     public void setAlarm(String title, String text, Date eventDate, int i) {
-
         longTime = Long.parseLong(String.valueOf(eventDate.getTime()));
         currentTime = System.currentTimeMillis();
 
@@ -193,7 +188,7 @@ public class MainActivity extends AppCompatActivity {
             intent1.putExtra("text", text);
             intent1.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
             pendingIntent1 = PendingIntent.getBroadcast(
-                    App.getContext(), i, intent1, PendingIntent.FLAG_UPDATE_CURRENT);
+                    App.getContext(), i, intent1, PendingIntent.FLAG_MUTABLE);
 
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
                 alarmManager1.setExactAndAllowWhileIdle(AlarmManager.ELAPSED_REALTIME_WAKEUP,
@@ -208,12 +203,16 @@ public class MainActivity extends AppCompatActivity {
             }
         }
         if (eventDate.before(currentDate)) {
-            if (intentArrayList.size() > 0) {
-                for (int j = 0; j < intentArrayList.size(); j++) {
-                    alarmManager1.cancel(intentArrayList.get(j));
-                }
-                intentArrayList.clear();
+            cancelPreviousAlarms();
+        }
+    }
+
+    public void cancelPreviousAlarms() {
+        if (intentArrayList.size() > 0) {
+            for (int j = 0; j < intentArrayList.size(); j++) {
+                alarmManager1.cancel(intentArrayList.get(j));
             }
+            intentArrayList.clear();
         }
     }
 
