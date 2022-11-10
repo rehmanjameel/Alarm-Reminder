@@ -11,6 +11,8 @@ import android.content.Intent;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
+import android.os.Handler;
+import android.os.Looper;
 import android.os.PowerManager;
 import android.os.SystemClock;
 import android.provider.Settings;
@@ -24,6 +26,12 @@ import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.Locale;
+import java.util.TimeZone;
+import java.util.Timer;
+import java.util.TimerTask;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
 
 import pk.codebase.requests.HttpRequest;
@@ -32,13 +40,20 @@ import pk.codebase.requests.HttpResponse;
 public class MainActivity extends AppCompatActivity {
 
     EventsModel eventsModel;
-    RecyclerView recyclerView;
+    public static RecyclerView recyclerView;
     public static ArrayList<EventsModel> eventsModelArrayList;
     public static EventsAdapter eventsAdapter;
     public static long longTime;
     public static long currentTime;
+    public static AlarmManager alarmManager1;
+    public static Intent intent1;
+    public static PendingIntent pendingIntent1;
     private ArrayList<PendingIntent> intentArrayList = new ArrayList<>();
-//    private ArrayList<String> dates = new ArrayList<>();
+    private ArrayList<String> dates = new ArrayList<>();
+
+    private Timer mTimer1;
+    private TimerTask mTt1;
+    private Handler mTimerHandler = new Handler();
 
     @RequiresApi(api = Build.VERSION_CODES.M)
     @Override
@@ -46,13 +61,10 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-//        dates.add("2022-11-04T15:35:05Z");
-//        dates.add("2022-11-04T15:45:05Z");
-//        dates.add("2022-11-04T16:5:05Z");
-//        dates.add("2022-11-05T18:30:05Z");
-//        dates.add("2022-11-05T19:45:05Z");
+        alarmManager1 = (AlarmManager) getSystemService(ALARM_SERVICE);
         eventsModelArrayList = new ArrayList<>();
         recyclerView = findViewById(R.id.recyclerViewId);
+
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
             Intent intent = new Intent();
@@ -65,24 +77,49 @@ public class MainActivity extends AppCompatActivity {
             }
         }
 
-//        Log.e("check array ", String.valueOf(dates.size()) + dates.toString());
-//        for (int i = 0; i < dates.size(); i++) {
-//            Log.e("check array ", dates.get(i));
+        //cancel all tasks
+        if (intentArrayList.size() > 0) {
+            for (int j = 0; j < intentArrayList.size(); j++) {
+                alarmManager1.cancel(intentArrayList.get(j));
+            }
+            intentArrayList.clear();
+        }
 
-//            setAlarm("Alarm title" + i, "Alarm text is here! ", dates.get(i), i);
-//            eventsModel = new EventsModel("Alarm title" + i, "Alarm text is here! ", dates.get(i));
-//            eventsModelArrayList.add(eventsModel);
-//            eventsAdapter = new EventsAdapter(eventsModelArrayList, this);
-//
-//            recyclerView.setAdapter(eventsAdapter);
-//            LinearLayoutManager layoutManager
-//                    = new LinearLayoutManager(this, LinearLayoutManager.VERTICAL,
-//                    false);
-//            recyclerView.setLayoutManager(layoutManager);
-//        }
-        getJSONFile();
+        ExecutorService executor = Executors.newSingleThreadExecutor();
+        Handler handler = new Handler(Looper.getMainLooper());
+        executor.execute(() -> {
+
+            // Assign new tasks
+            handler.post(this::getJSONFile);
+        });
     }
 
+    public void sampleAlarmTime() {
+
+        dates.clear();
+        dates.add("2022-11-10T13:27:05Z");
+        dates.add("2022-11-10T13:28:05Z");
+        dates.add("2022-11-10T13:30:05Z");
+        dates.add("2022-11-10T13:34:05Z");
+        dates.add("2022-11-10T13:45:05Z");
+
+//        Log.e("check array ", String.valueOf(dates.size()) + dates.toString());
+        eventsModelArrayList.clear();
+        for (int i = 0; i < dates.size(); i++) {
+
+//            setAlarm("Alarm title" + i, "Alarm text is here! ", dates.get(i), i);
+            eventsModel = new EventsModel("Alarm title" + i, "Alarm text is here! ", dates.get(i));
+            eventsModelArrayList.add(eventsModel);
+            eventsAdapter = new EventsAdapter(eventsModelArrayList, this);
+
+            recyclerView.setAdapter(eventsAdapter);
+            LinearLayoutManager layoutManager
+                    = new LinearLayoutManager(this, LinearLayoutManager.VERTICAL,
+                    false);
+            recyclerView.setLayoutManager(layoutManager);
+        }
+
+    }
     public void getJSONFile() {
         HttpRequest httpRequest = new HttpRequest();
 
@@ -93,14 +130,29 @@ public class MainActivity extends AppCompatActivity {
 //                    String events = jsonObject.getString("events");
                     JSONArray jsonArray = jsonObject.getJSONArray("events");
 
+                    eventsModelArrayList.clear();
                     for (int i = 0; i < jsonArray.length(); i++) {
                         try {
                             JSONObject jsonObject1 = jsonArray.getJSONObject(i);
                             String title = jsonObject1.getString("title");
                             String text = jsonObject1.getString("text");
                             String date = jsonObject1.getString("date");
-                            setAlarm(title, text, date, i);
-                            eventsModel = new EventsModel(title, text, date);
+
+                            SimpleDateFormat df = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss'Z'", Locale.ENGLISH);
+                            df.setTimeZone(TimeZone.getTimeZone("UTC"));
+                            Date date1 = null;
+                            try {
+                                date1 = df.parse(date);
+                                assert date1 != null;
+                            } catch (ParseException e) {
+                                e.printStackTrace();
+                            }
+                            df.setTimeZone(TimeZone.getDefault());
+                            assert date1 != null;
+                            String formattedDate = df.format(date1);
+
+                            setAlarm(title, text, date1, i);
+                            eventsModel = new EventsModel(title, text, formattedDate);
                             eventsModelArrayList.add(eventsModel);
                             eventsAdapter = new EventsAdapter(eventsModelArrayList, this);
 
@@ -126,29 +178,22 @@ public class MainActivity extends AppCompatActivity {
         httpRequest.get("https://visihelp.com/feed/?id=re462eea7cfec4e84d4267435");
     }
 
-    public void setAlarm(String title, String text, String eventDate, int i) {
-        Date alarmDate = new Date();
-        SimpleDateFormat formatter5 = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss'Z'");
-        try {
-            alarmDate = formatter5.parse(eventDate);
-        } catch (ParseException e) {
-            e.printStackTrace();
-        }
-        assert alarmDate != null;
-        longTime = Long.parseLong(String.valueOf(alarmDate.getTime()));
+    public void setAlarm(String title, String text, Date eventDate, int i) {
+
+        longTime = Long.parseLong(String.valueOf(eventDate.getTime()));
         currentTime = System.currentTimeMillis();
 
         Date currentDate = new Date(currentTime);
         long secs = TimeUnit.MILLISECONDS.toSeconds(longTime - currentTime);
-        AlarmManager alarmManager1 = (AlarmManager) getSystemService(ALARM_SERVICE);
-        if (alarmDate.after(currentDate)) {
+        if (eventDate.after(currentDate)) {
             //Schedule Alarm Receiver in Main Activity
-            Intent intent1 = new Intent(this, AlarmReceiver.class);
+            intent1 = new Intent(App.getContext(), AlarmReceiver.class);
             intent1.setAction("PLAY_ACTION");
             intent1.putExtra("title", title);
             intent1.putExtra("text", text);
-            PendingIntent pendingIntent1 = PendingIntent.getBroadcast(
-                    this, i, intent1, PendingIntent.FLAG_IMMUTABLE);
+            intent1.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+            pendingIntent1 = PendingIntent.getBroadcast(
+                    App.getContext(), i, intent1, PendingIntent.FLAG_UPDATE_CURRENT);
 
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
                 alarmManager1.setExactAndAllowWhileIdle(AlarmManager.ELAPSED_REALTIME_WAKEUP,
@@ -162,13 +207,49 @@ public class MainActivity extends AppCompatActivity {
                 intentArrayList.add(pendingIntent1);
             }
         }
-        if (alarmDate.before(currentDate)) {
+        if (eventDate.before(currentDate)) {
             if (intentArrayList.size() > 0) {
                 for (int j = 0; j < intentArrayList.size(); j++) {
                     alarmManager1.cancel(intentArrayList.get(j));
                 }
                 intentArrayList.clear();
             }
+        }
+    }
+
+    @Override
+    protected void onResume() {
+        if (Helper.isMyServiceRunning(AlarmService.class)){
+            startTimer();
+        }
+        super.onResume();
+    }
+
+    private void startTimer() {
+        mTimer1 = new Timer();
+        mTt1 = new TimerTask() {
+            public void run() {
+                mTimerHandler.post(new Runnable() {
+                    public void run() {
+                        getJSONFile();
+                    }
+                });
+            }
+        };
+
+        mTimer1.schedule(mTt1, 1, 300000);
+    }
+
+    @Override
+    protected void onPause() {
+        stopTimer();
+        super.onPause();
+    }
+
+    private void stopTimer() {
+        if (mTimer1 != null) {
+            mTimer1.cancel();
+            mTimer1.purge();
         }
     }
 }

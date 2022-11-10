@@ -13,7 +13,6 @@ import android.media.RingtoneManager;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Vibrator;
-import android.util.Log;
 import android.widget.Toast;
 
 import androidx.annotation.RequiresApi;
@@ -29,16 +28,13 @@ public class AlarmReceiver extends BroadcastReceiver {
 
             String title = intent.getExtras().getString("title");
             String text = intent.getExtras().getString("text");
-            String date = intent.getExtras().getString("date");
-            Log.e("in rec ", title);
 //            vibrator(context);
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
 
                 if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-                    Log.e("in rec ", text);
                     context.startForegroundService(intent);
                 }
-                showNotification(context, title, text + "\n" + date);
+                showNotification(context, title, text);
             }
         }
     }
@@ -79,7 +75,7 @@ public class AlarmReceiver extends BroadcastReceiver {
 
     public void vibrator(Context context) {
         Vibrator vibrator = (Vibrator) context.getSystemService(Context.VIBRATOR_SERVICE);
-        vibrator.vibrate(4000);
+//        vibrator.vibrate(4000);
 
         Toast.makeText(context, "Alarm! Wake up! Wake up!", Toast.LENGTH_LONG).show();
         Uri alarmUri = RingtoneManager.getDefaultUri(RingtoneManager.TYPE_ALARM);
