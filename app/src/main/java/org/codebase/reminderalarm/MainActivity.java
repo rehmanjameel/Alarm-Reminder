@@ -93,17 +93,30 @@ public class MainActivity extends AppCompatActivity {
     public void sampleAlarmTime() {
 
         dates.clear();
-        dates.add("2022-11-10T13:27:05Z");
-        dates.add("2022-11-10T13:28:05Z");
-        dates.add("2022-11-10T13:30:05Z");
-        dates.add("2022-11-10T13:34:05Z");
-        dates.add("2022-11-10T13:45:05Z");
+        dates.add("2022-11-12T16:20:05Z");
+        dates.add("2022-11-12T16:25:05Z");
+        dates.add("2022-11-12T16:30:05Z");
+        dates.add("2022-11-12T16:35:05Z");
+        dates.add("2022-11-12T16:40:05Z");
 
 //        Log.e("check array ", String.valueOf(dates.size()) + dates.toString());
         eventsModelArrayList.clear();
         for (int i = 0; i < dates.size(); i++) {
 
-//            setAlarm("Alarm title" + i, "Alarm text is here! ", dates.get(i), i);
+            SimpleDateFormat df = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss'Z'", Locale.ENGLISH);
+//            df.setTimeZone(TimeZone.getTimeZone("UTC"));
+            Date date1 = null;
+            try {
+                date1 = df.parse(dates.get(i));
+                assert date1 != null;
+            } catch (ParseException e) {
+                e.printStackTrace();
+            }
+//            df.setTimeZone(TimeZone.getDefault());
+            assert date1 != null;
+            String formattedDate = df.format(date1);
+            Log.e("TAG date", date1.toString());
+            setAlarm("Alarm title" + i, "Alarm text is here! ", date1, i);
             eventsModel = new EventsModel("Alarm title" + i, "Alarm text is here! ", dates.get(i));
             eventsModelArrayList.add(eventsModel);
             eventsAdapter = new EventsAdapter(eventsModelArrayList, this);
