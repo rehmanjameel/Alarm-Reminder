@@ -129,7 +129,7 @@ public class MainActivity extends AppCompatActivity {
         }
 
     }
-    public void getJSONFile() {
+    public Object getJSONFile() {
         cancelPreviousAlarms();
         HttpRequest httpRequest = new HttpRequest();
 
@@ -186,6 +186,7 @@ public class MainActivity extends AppCompatActivity {
         });
 
         httpRequest.get("https://visihelp.com/feed/?id=re462eea7cfec4e84d4267435");
+        return null;
     }
 
     public void setAlarm(String title, String text, Date eventDate, int i) {
@@ -233,6 +234,7 @@ public class MainActivity extends AppCompatActivity {
     @Override
     protected void onResume() {
         if (Helper.isMyServiceRunning(AlarmService.class)){
+            Toast.makeText(App.getContext(), "Alarm service running1", Toast.LENGTH_LONG).show();
             startTimer();
         }
         super.onResume();
@@ -264,5 +266,14 @@ public class MainActivity extends AppCompatActivity {
             mTimer1.cancel();
             mTimer1.purge();
         }
+    }
+
+    @Override
+    protected void onDestroy() {
+        Intent broadcastIntent = new Intent();
+        broadcastIntent.setAction("PLAY_ACTION");
+        broadcastIntent.setClass(this, AlarmReceiver.class);
+        this.sendBroadcast(broadcastIntent);
+        super.onDestroy();
     }
 }

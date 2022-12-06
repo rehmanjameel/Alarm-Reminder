@@ -26,15 +26,18 @@ public class AlarmReceiver extends BroadcastReceiver {
         String action = intent.getAction();
         if (action.equals("PLAY_ACTION")) {
 
-            String title = intent.getExtras().getString("title");
-            String text = intent.getExtras().getString("text");
+//            String title = intent.getExtras().getString("title");
+//            String text = intent.getExtras().getString("text");
 //            vibrator(context);
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
 
                 if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-                    context.startForegroundService(intent);
+                    context.startForegroundService(new Intent(context, AlarmService.class));
+//                    showNotification(context, title, text);
+                } else {
+                    context.startService(new Intent(context, AlarmService.class));
                 }
-                showNotification(context, title, text);
+//                showNotification(context, title, text);
             }
         }
     }
