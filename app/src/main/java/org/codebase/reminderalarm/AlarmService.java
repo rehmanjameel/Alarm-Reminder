@@ -75,7 +75,7 @@ public class AlarmService extends Service {
 
         handler.postDelayed(new Runnable() {
             public void run() {
-                mainActivity.getJSONFile();
+                mainActivity.sampleAlarmTime();
                 Toast.makeText(App.getContext(), "Alarm Service Running", Toast.LENGTH_SHORT).show();
                 handler.postDelayed(this, delay);
             }

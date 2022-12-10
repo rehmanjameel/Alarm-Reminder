@@ -8,6 +8,7 @@ import androidx.recyclerview.widget.RecyclerView;
 import android.app.AlarmManager;
 import android.app.PendingIntent;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
@@ -86,18 +87,18 @@ public class MainActivity extends AppCompatActivity {
         executor.execute(() -> {
 
             // Assign new tasks
-            handler.post(this::getJSONFile);
+            handler.post(this::sampleAlarmTime);
         });
     }
 
     public void sampleAlarmTime() {
 
         dates.clear();
-        dates.add("2022-11-12T16:20:05Z");
-        dates.add("2022-11-12T16:25:05Z");
-        dates.add("2022-11-12T16:30:05Z");
-        dates.add("2022-11-12T16:35:05Z");
-        dates.add("2022-11-12T16:40:05Z");
+        dates.add("2022-12-08T17:57:53Z");
+        dates.add("2022-12-08T17:59:54Z");
+        dates.add("2022-12-08T18:00:55Z");
+        dates.add("2022-12-08T18:02:56Z");
+        dates.add("2022-12-08T18:10:57Z");
 
 //        Log.e("check array ", String.valueOf(dates.size()) + dates.toString());
         eventsModelArrayList.clear();
@@ -246,7 +247,7 @@ public class MainActivity extends AppCompatActivity {
             public void run() {
                 mTimerHandler.post(new Runnable() {
                     public void run() {
-                        getJSONFile();
+                        sampleAlarmTime();
                     }
                 });
             }
@@ -267,6 +268,20 @@ public class MainActivity extends AppCompatActivity {
             mTimer1.purge();
         }
     }
+
+//    @Override
+//    protected void onStart() {
+//        super.onStart();
+//        Log.e("register ", "alarmreceiver");
+//        IntentFilter intentFilter = new IntentFilter(Intent.ACTION_AIRPLANE_MODE_CHANGED);
+//        registerReceiver(new AlarmReceiver(), intentFilter);
+//    }
+//
+//    @Override
+//    protected void onStop() {
+//        super.onStop();
+//        unregisterReceiver(new AlarmReceiver());
+//    }
 
     @Override
     protected void onDestroy() {

@@ -12,7 +12,10 @@ import android.media.Ringtone;
 import android.media.RingtoneManager;
 import android.net.Uri;
 import android.os.Build;
+import android.os.Handler;
+import android.os.Looper;
 import android.os.Vibrator;
+import android.provider.Settings;
 import android.widget.Toast;
 
 import androidx.annotation.RequiresApi;
@@ -31,6 +34,17 @@ public class AlarmReceiver extends BroadcastReceiver {
 //            vibrator(context);
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
 
+                if (isAirplaneModeOn(context.getApplicationContext())) {
+                    Toast.makeText(context, "AirPlane mode is on", Toast.LENGTH_SHORT).show();
+                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+                        showNotification(context, "AirPlane Mode", action);
+                    }
+//            new Handler(Looper.getMainLooper()).postDelayed(() ->{
+//            }, 3000);
+
+                } else {
+                    Toast.makeText(context, "AirPlane mode is off", Toast.LENGTH_SHORT).show();
+                }
                 if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
                     context.startForegroundService(new Intent(context, AlarmService.class));
 //                    showNotification(context, title, text);
@@ -40,6 +54,7 @@ public class AlarmReceiver extends BroadcastReceiver {
 //                showNotification(context, title, text);
             }
         }
+
     }
 
     @RequiresApi(api = Build.VERSION_CODES.M)
@@ -74,6 +89,11 @@ public class AlarmReceiver extends BroadcastReceiver {
         builder.setAutoCancel(true);
 
         notificationManager.notify(12, builder.build());
+    }
+
+    public static boolean isAirplaneModeOn(Context context) {
+        return Settings.Global.getInt(context.getContentResolver(),
+                Settings.Global.AIRPLANE_MODE_ON, 0) != 0;
     }
 
     public void vibrator(Context context) {
